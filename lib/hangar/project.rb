@@ -1,6 +1,6 @@
 module Hangar
   module Project
-    def self.add(path)
+    def self.add(path, aliaz = nil)
       path = File.expand_path(path)
       config = File.join(path, Config.config_filename)
 
@@ -10,23 +10,22 @@ module Hangar
       end
 
       Config.ensure_data_dir
-      entries = load_registry
-      if entries.include?(path)
+      if load_registry.include?(path)
         puts "Already registered: #{path}"
         return
       end
 
-      File.open(Config.registry_file, "a") { |f| f.puts(path) }
-      puts "Registered: #{path}"
+      entry = aliaz && !aliaz.empty? ? "#{path}\t#{aliaz}" : path
+      File.open(Config.registry_file, "a") { |f| f.puts(entry) }
+      puts aliaz ? "Registered: #{path} as '#{aliaz}'" : "Registered: #{path}"
     end
 
     def self.remove(query)
-      entries = load_registry
-      match = resolve(query, entries)
+      match = resolve(query)
       return unless match
 
-      entries.delete(match)
-      write_registry(entries)
+      raw = raw_registry.reject { |path, _| path == match }
+      write_raw_registry(raw)
       puts "Removed: #{match}"
     end
 
@@ -51,18 +50,32 @@ module Hangar
       exec(editor, config)
     end
 
-    def self.load_registry
+    def self.raw_registry
       return [] unless File.exist?(Config.registry_file)
-      File.readlines(Config.registry_file).map(&:strip).reject(&:empty?)
+      File.readlines(Config.registry_file).map(&:strip).reject(&:empty?).map do |line|
+        path, aliaz = line.split("\t", 2)
+        [path, (aliaz if aliaz && !aliaz.empty?)]
+      end
     end
 
-    def self.write_registry(entries)
+    def self.load_registry
+      raw_registry.map(&:first)
+    end
+
+    def self.load_aliases
+      raw_registry.each_with_object({}) do |(path, aliaz), h|
+        h[path] = aliaz if aliaz
+      end
+    end
+
+    def self.write_raw_registry(entries)
       Config.ensure_data_dir
-      File.write(Config.registry_file, entries.join("\n") + "\n")
+      lines = entries.map { |path, aliaz| aliaz ? "#{path}\t#{aliaz}" : path }
+      File.write(Config.registry_file, lines.join("\n") + "\n")
     end
 
     def self.session_name(path)
-      File.basename(path)
+      load_aliases[path] || File.basename(path)
     end
 
     def self.resolve(query, entries = load_registry)

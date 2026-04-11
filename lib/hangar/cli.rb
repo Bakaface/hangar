@@ -53,7 +53,7 @@ module Hangar
           list                  List registered projects
           sessions              List running tmux sessions
           switch                Fuzzy-pick a running session to switch to
-          add [path]            Register a project (defaults to cwd)
+          add [path] [--as N]   Register a project (defaults to cwd) with optional alias
           remove [query]        Unregister a project
           init [template]       Create .hangar.sh in cwd from a template
           edit [query]          Edit a project's .hangar.sh
@@ -90,7 +90,16 @@ module Hangar
     end
 
     def self.cmd_add(args)
-      Project.add(args.first || Dir.pwd)
+      path = nil
+      aliaz = nil
+      while (arg = args.shift)
+        if arg == "--as"
+          aliaz = args.shift
+        else
+          path = arg
+        end
+      end
+      Project.add(path || Dir.pwd, aliaz)
     end
 
     def self.cmd_remove(args)
