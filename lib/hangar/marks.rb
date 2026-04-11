@@ -1,4 +1,5 @@
 require "io/console"
+require "set"
 
 module Hangar
   module Marks
@@ -43,7 +44,7 @@ module Hangar
     end
 
     def self.goto
-      running = Session.running_session_names
+      running = Session.running_session_names.to_set
       marks = load_marks.select { |_k, v| running.include?(v) }
       if marks.empty?
         puts "No marks for running sessions"
@@ -65,9 +66,7 @@ module Hangar
 
         # Exact match → switch
         if marks.key?(input)
-          session = marks[input]
-          system("tmux", "switch-client", "-t", session, err: File::NULL) ||
-            puts("\nSession \"#{session}\" not running")
+          system("tmux", "switch-client", "-t", marks[input], err: File::NULL)
           return
         end
 
