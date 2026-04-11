@@ -23,6 +23,9 @@ module Hangar
       # Generate and run wrapper script
       script = generate_wrapper(name, project_dir)
       system("bash", script, inside_tmux? ? "" : "a")
+
+      # When inside tmux, follow the newly created session
+      exec("tmux", "switch-client", "-t", name) if inside_tmux?
     end
 
     def self.kill(query)
