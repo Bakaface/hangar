@@ -127,7 +127,7 @@ module Hangar
     end
 
     def self.cmd_init(args)
-      Template.init(args.first || "basic")
+      Template.init(args.first || Config.default_template)
     end
 
     def self.cmd_edit(args)

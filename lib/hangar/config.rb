@@ -1,8 +1,31 @@
+require "yaml"
+
 module Hangar
   module Config
     def self.data_dir
       dir = ENV.fetch("XDG_DATA_HOME", File.expand_path("~/.local/share"))
       File.join(dir, "hangar")
+    end
+
+    def self.config_dir
+      dir = ENV.fetch("XDG_CONFIG_HOME", File.expand_path("~/.config"))
+      File.join(dir, "hangar")
+    end
+
+    def self.config_file
+      File.join(config_dir, "config.yml")
+    end
+
+    def self.settings
+      @settings ||= if File.exist?(config_file)
+        YAML.safe_load_file(config_file) || {}
+      else
+        {}
+      end
+    end
+
+    def self.default_template
+      settings["default_template"] || "basic"
     end
 
     def self.registry_file
