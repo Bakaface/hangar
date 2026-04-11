@@ -41,8 +41,7 @@ module Hangar
     end
 
     def self.edit(query)
-      entries = load_registry
-      match = resolve(query, entries)
+      match = find_project_dir(query)
       return unless match
 
       editor = ENV.fetch("EDITOR", "vim")
