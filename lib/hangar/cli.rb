@@ -18,6 +18,25 @@ module Hangar
       "template"  => :cmd_template,
     }.freeze
 
+    ALIASES = {
+      "o"  => "open",
+      "k"  => "kill",
+      "l"  => "list",
+      "ls" => "list",
+      "s"  => "sessions",
+      "ss" => "sessions",
+      "sw" => "switch",
+      "a"  => "add",
+      "rm" => "remove",
+      "i"  => "init",
+      "ip" => "init",
+      "e"  => "edit",
+      "m"  => "mark",
+      "b"  => "bindings",
+      "ts" => "templates",
+      "t"  => "template",
+    }.freeze
+
     def self.run(args)
       command = args.shift
 
@@ -31,6 +50,7 @@ module Hangar
         return
       end
 
+      command = ALIASES.fetch(command, command)
       method = COMMANDS[command]
       if method.nil?
         $stderr.puts "hangar: unknown command '#{command}'"
@@ -48,24 +68,24 @@ module Hangar
         Usage: hangar <command> [args]
 
         Commands:
-          open [query]          Open/create session for a project
-          kill [query]          Kill a running session
-          list                  List registered projects
-          sessions              List running tmux sessions
-          switch                Fuzzy-pick a running session to switch to
-          add [path] [--as N]   Register a project (defaults to cwd) with optional alias
-          remove [query]        Unregister a project
-          init [template]       Create .hangar.sh in cwd from a template
-          edit [query]          Edit a project's .hangar.sh
-          mark set <keys>       Set a mark on current session
-          mark get [session]    Get the mark for a session
-          mark goto             Interactive mark selector
-          mark list             List all marks
-          bindings [--bind]     Generate tmux keybindings
-          templates             List available templates
-          template new <name>   Create a new template
-          template edit <name>  Edit a template
-          version               Show version
+          open, o [query]           Open/create session for a project
+          kill, k [query]           Kill a running session
+          list, l, ls               List registered projects
+          sessions, s, ss           List running tmux sessions
+          switch, sw                Fuzzy-pick a running session to switch to
+          add, a [path] [--as N]    Register a project (defaults to cwd) with optional alias
+          remove, rm [query]        Unregister a project
+          init, i, ip [template]    Create .hangar.sh in cwd from a template
+          edit, e [query]           Edit a project's .hangar.sh
+          mark, m set <keys>        Set a mark on current session
+          mark, m get [session]     Get the mark for a session
+          mark, m goto              Interactive mark selector
+          mark, m list              List all marks
+          bindings, b [--bind]      Generate tmux keybindings
+          templates, ts             List available templates
+          template, t new <name>    Create a new template
+          template, t edit <name>   Edit a template
+          version                   Show version
       USAGE
     end
 
