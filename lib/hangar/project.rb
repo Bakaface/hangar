@@ -74,7 +74,8 @@ module Hangar
     end
 
     def self.session_name(path)
-      load_aliases[path] || File.basename(path)
+      name = load_aliases[path] || File.basename(path)
+      name.tr(".:", "_")
     end
 
     def self.resolve(query, entries = load_registry)
