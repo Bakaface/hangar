@@ -46,7 +46,10 @@ module Hangar
 
       editor = ENV.fetch("EDITOR", "vim")
       config = File.join(match, Config.config_filename)
-      exec(editor, config)
+      system(editor, config)
+
+      # Refresh tmux keybindings in case shortcuts were changed
+      Bindings.generate(bind: true) if Session.inside_tmux?
     end
 
     def self.raw_registry

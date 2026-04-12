@@ -14,6 +14,9 @@ module Hangar
         Project.add(project_dir)
       end
 
+      # Refresh tmux keybindings so new/changed shortcuts activate immediately
+      Bindings.generate(bind: true) if inside_tmux?
+
       # If session already running, attach to it
       if session_exists?(name)
         attach(name)
