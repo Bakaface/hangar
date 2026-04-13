@@ -31,6 +31,51 @@ module Hangar
       exec("tmux", "switch-client", "-t", name) if inside_tmux?
     end
 
+    def self.start(query)
+      project_dir = Project.find_project_dir(query)
+      return nil if project_dir.nil?
+
+      name = Project.session_name(project_dir)
+
+      unless Project.load_registry.include?(project_dir)
+        Project.add(project_dir)
+      end
+
+      if session_exists?(name)
+        return :already_running
+      end
+
+      script = generate_wrapper(name, project_dir)
+      system("bash", script)
+      :started
+    end
+
+    def self.up
+      projects = Config.startup
+      if projects.empty?
+        $stderr.puts "No startup projects configured"
+        $stderr.puts "Add a 'startup' list to #{Config.config_file}"
+        exit 1
+      end
+
+      started = []
+      already_running = []
+
+      projects.each do |query|
+        result = start(query)
+        case result
+        when :started then started << query
+        when :already_running then already_running << query
+        else $stderr.puts "Not found: #{query}"
+        end
+      end
+
+      Bindings.generate(bind: true) if inside_tmux? && !started.empty?
+
+      puts "Started: #{started.join(', ')}" unless started.empty?
+      puts "Already running: #{already_running.join(', ')}" unless already_running.empty?
+    end
+
     def self.kill(query)
       name = if query
         query

@@ -16,10 +16,12 @@ module Hangar
       "bindings"  => :cmd_bindings,
       "templates" => :cmd_templates,
       "template"  => :cmd_template,
+      "up"        => :cmd_up,
     }.freeze
 
     ALIASES = {
       "o"  => "open",
+      "u"  => "up",
       "k"  => "kill",
       "l"  => "list",
       "ls" => "list",
@@ -85,6 +87,7 @@ module Hangar
           templates, ts             List available templates
           template, t new <name>    Create a new template
           template, t edit <name>   Edit a template
+          up, u                     Start all configured startup projects
           version                   Show version
       USAGE
     end
@@ -153,6 +156,10 @@ module Hangar
 
     def self.cmd_templates(_args)
       Template.list
+    end
+
+    def self.cmd_up(_args)
+      Session.up
     end
 
     def self.cmd_template(args)

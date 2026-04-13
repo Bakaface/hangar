@@ -28,6 +28,10 @@ module Hangar
       settings["default_template"] || "basic"
     end
 
+    def self.startup
+      settings["startup"] || []
+    end
+
     def self.registry_file
       File.join(data_dir, "projects")
     end
