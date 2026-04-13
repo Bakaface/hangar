@@ -1,0 +1,31 @@
+[tasks.install]
+alias = "i"
+description = "Build and install the hangar-cli gem from the local checkout"
+run = [
+  "gem build hangar-cli.gemspec",
+  "gem install ./hangar-cli-$(ruby -Ilib -rhangar/version -e 'print Hangar::VERSION').gem"
+]
+
+[tasks.run]
+alias = "r"
+run = "bin/hangar"
+
+[tasks.console]
+alias = "c"
+run = "irb -Ilib -rhangar"
+
+[tasks.build]
+alias = "b"
+run = "gem build hangar-cli.gemspec"
+
+[tasks.release]
+alias = "rel"
+description = "Build and push the gem to RubyGems"
+run = [
+  "gem build hangar-cli.gemspec",
+  "gem push hangar-cli-$(ruby -Ilib -rhangar/version -e 'print Hangar::VERSION').gem"
+]
+
+[tasks.clean]
+alias = "cl"
+run = "rm -f hangar-cli-*.gem"
