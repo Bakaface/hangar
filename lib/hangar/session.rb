@@ -168,6 +168,7 @@ module Hangar
         repo=#{Shellwords.escape(project_dir)}
 
         source #{Shellwords.escape(lib_sh)}
+        [[ -f #{Shellwords.escape(Config.helpers_sh)} ]] && source #{Shellwords.escape(Config.helpers_sh)}
         cd #{Shellwords.escape(project_dir)}
         source #{Shellwords.escape(config_file)}
 

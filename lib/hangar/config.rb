@@ -52,6 +52,10 @@ module Hangar
       File.join(share_dir, "lib.sh")
     end
 
+    def self.helpers_sh
+      File.join(config_dir, "helpers.sh")
+    end
+
     def self.builtin_templates_dir
       File.join(share_dir, "templates")
     end
