@@ -26,7 +26,15 @@ Tmux session & project manager. Ruby gem (`hangar-cli`), binary is `hangar`.
 ## Commands
 
 ```
-hangar open|kill|list|sessions|add|remove|init|edit|mark|bindings|templates|template
+hangar open|kill|list|sessions|switch|add|remove|init|edit|mark|bindings|templates|template|up
+```
+
+## Verification
+
+After making changes, run the smoke test to catch syntax/require errors:
+
+```
+ruby -e "require_relative 'lib/hangar'; puts 'OK'"
 ```
 
 ## Conventions
