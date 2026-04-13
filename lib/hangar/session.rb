@@ -125,7 +125,7 @@ module Hangar
       end
       return if result.empty?
 
-      session = result.sub(/^\S*\s*/, "")
+      session = result.sub(/^\S+\s+/, "")
       exec("tmux", "switch-client", "-t", session)
     end
 
