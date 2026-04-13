@@ -30,11 +30,23 @@ send() {
   tmux send-keys -t "$current_window" "$1" C-m
 }
 
+select_window() {
+  tmux select-window -t "$session:$1"
+}
+
 vsplit() {
   if [ -z ${path+x} ]; then
     tmux split-window -h
   else
     eval "tmux split-window -h -c $path"
+  fi
+}
+
+hsplit() {
+  if [ -z ${path+x} ]; then
+    tmux split-window -v
+  else
+    eval "tmux split-window -v -c $path"
   fi
 }
 
