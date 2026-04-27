@@ -1,0 +1,12 @@
+{
+  "name": "hangar",
+  "version": "0.1.0",
+  "description": "Claude Code skill for configuring Hangar — the tmux session & project manager.",
+  "author": {
+    "name": "Albert"
+  },
+  "homepage": "https://github.com/Bakaface/hangar",
+  "repository": "https://github.com/Bakaface/hangar",
+  "license": "MIT",
+  "keywords": ["hangar", "tmux", "session-manager", "configuration"]
+}
