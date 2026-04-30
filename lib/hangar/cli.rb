@@ -10,6 +10,7 @@ module Hangar
       "switch"    => :cmd_switch,
       "add"       => :cmd_add,
       "remove"    => :cmd_remove,
+      "rename"    => :cmd_rename,
       "init"      => :cmd_init,
       "edit"      => :cmd_edit,
       "mark"      => :cmd_mark,
@@ -30,6 +31,7 @@ module Hangar
       "sw" => "switch",
       "a"  => "add",
       "rm" => "remove",
+      "mv" => "rename",
       "i"  => "init",
       "ip" => "init",
       "e"  => "edit",
@@ -77,6 +79,7 @@ module Hangar
           switch, sw                Fuzzy-pick a running session to switch to
           add, a [path] [--as N]    Register a project (defaults to cwd) with optional alias
           remove, rm [query]        Unregister a project
+          rename, mv <query> <name> Rename a project's alias (empty name clears it)
           init, i, ip [template]    Create .hangar.sh in cwd from a template
           edit, e [query]           Edit a project's .hangar.sh
           mark, m set <keys>        Set a mark on current session
@@ -127,6 +130,14 @@ module Hangar
 
     def self.cmd_remove(args)
       Project.remove(args.first)
+    end
+
+    def self.cmd_rename(args)
+      if args.size < 2
+        $stderr.puts "Usage: hangar rename <query> <new-name>"
+        exit 1
+      end
+      Project.rename(args[0], args[1])
     end
 
     def self.cmd_init(args)

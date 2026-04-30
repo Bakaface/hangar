@@ -29,6 +29,32 @@ module Hangar
       puts "Removed: #{match}"
     end
 
+    def self.rename(query, new_alias)
+      match = resolve(query)
+      return unless match
+
+      if new_alias.include?("\t")
+        $stderr.puts "hangar: alias may not contain tabs"
+        exit 1
+      end
+
+      old_name = session_name(match)
+      new_alias = new_alias.strip
+      raw = raw_registry.map do |path, aliaz|
+        path == match ? [path, (new_alias unless new_alias.empty?)] : [path, aliaz]
+      end
+      write_raw_registry(raw)
+
+      new_name = session_name(match)
+      if old_name != new_name && Session.session_exists?(old_name)
+        system("tmux", "rename-session", "-t", old_name, new_name)
+      end
+
+      Bindings.generate(bind: true) if Session.inside_tmux?
+
+      puts new_alias.empty? ? "Renamed: #{match} (alias cleared, now '#{new_name}')" : "Renamed: #{match} as '#{new_alias}'"
+    end
+
     def self.list
       entries = load_registry
       running = Session.running_session_names
