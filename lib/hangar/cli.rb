@@ -14,10 +14,11 @@ module Hangar
       "init"      => :cmd_init,
       "edit"      => :cmd_edit,
       "mark"      => :cmd_mark,
-      "bindings"  => :cmd_bindings,
+      "generate-bindings" => :cmd_bindings,
       "templates" => :cmd_templates,
       "template"  => :cmd_template,
       "up"        => :cmd_up,
+      "bootstrap" => :cmd_bootstrap,
     }.freeze
 
     ALIASES = {
@@ -36,7 +37,8 @@ module Hangar
       "ip" => "init",
       "e"  => "edit",
       "m"  => "mark",
-      "b"  => "bindings",
+      "b"  => "bootstrap",
+      "gb" => "generate-bindings",
       "ts" => "templates",
       "t"  => "template",
     }.freeze
@@ -81,12 +83,14 @@ module Hangar
           remove, rm [query]        Unregister a project
           rename, mv <query> <name> Rename a project's alias (empty name clears it)
           init, i, ip [template]    Create .hangar.sh in cwd from a template
+          bootstrap, b [template]   init + add + start session detached
           edit, e [query]           Edit a project's .hangar.sh
           mark, m set <keys>        Set a mark on current session
           mark, m get [session]     Get the mark for a session
           mark, m goto              Interactive mark selector
           mark, m list              List all marks
-          bindings, b [--bind]      Generate tmux keybindings
+          generate-bindings, gb [--bind]
+                                    Generate tmux keybindings
           templates, ts             List available templates
           template, t new <name>    Create a new template
           template, t edit <name>   Edit a template
@@ -142,6 +146,17 @@ module Hangar
 
     def self.cmd_init(args)
       Template.init(args.first || Config.default_template)
+    end
+
+    def self.cmd_bootstrap(args)
+      Template.init(args.first || Config.default_template)
+      Project.add(Dir.pwd)
+      name = Project.session_name(Dir.pwd)
+      case Session.start(Dir.pwd)
+      when :started        then puts "Started session: #{name}"
+      when :already_running then puts "Already running: #{name}"
+      end
+      Bindings.generate(bind: true) if Session.inside_tmux?
     end
 
     def self.cmd_edit(args)

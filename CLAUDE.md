@@ -38,10 +38,10 @@ Tmux session & project manager. Ruby gem (`hangar-cli`), binary is `hangar`.
 ## Commands
 
 ```
-hangar open|kill|list|sessions|switch|add|remove|rename|init|edit|mark|bindings|templates|template|up
+hangar open|kill|list|sessions|switch|add|remove|rename|init|bootstrap|edit|mark|generate-bindings|templates|template|up
 ```
 
-Short aliases live in `CLI::ALIASES` (`o`, `k`, `l`/`ls`, `s`/`ss`, `sw`, `a`, `rm`, `mv`, `i`/`ip`, `e`, `m`, `b`, `ts`, `t`, `u`).
+Short aliases live in `CLI::ALIASES` (`o`, `k`, `l`/`ls`, `s`/`ss`, `sw`, `a`, `rm`, `mv`, `i`/`ip`, `b`, `e`, `m`, `gb`, `ts`, `t`, `u`). `bootstrap` chains `init` + `add` + `Session.start` (detached, no attach/switch) and refreshes bindings.
 
 ## Development
 

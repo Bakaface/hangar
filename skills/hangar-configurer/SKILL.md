@@ -23,14 +23,15 @@ Configure Hangar — a tmux session & project manager (Ruby gem `hangar-cli`, bi
 ## CLI Reference
 
 ```
-hangar open|kill|list|sessions|switch|add|remove|init|edit|mark|bindings|templates|template|up
+hangar open|kill|list|sessions|switch|add|remove|init|bootstrap|edit|mark|generate-bindings|templates|template|up
 ```
 
-Aliases: `o=open, u=up, k=kill, l/ls=list, s/ss=sessions, sw=switch, a=add, rm=remove, i/ip=init, e=edit, m=mark, b=bindings, ts=templates, t=template`. Users typically alias the binary itself: `alias hg=hangar`.
+Aliases: `o=open, u=up, k=kill, l/ls=list, s/ss=sessions, sw=switch, a=add, rm=remove, i/ip=init, b=bootstrap, e=edit, m=mark, gb=generate-bindings, ts=templates, t=template`. Users typically alias the binary itself: `alias hg=hangar`.
 
 | Command | Effect |
 |---------|--------|
 | `hangar init [template]` | Create `.hangar.sh` in cwd from template (default from `config.yml`) |
+| `hangar bootstrap [template]` | `init` + `add` cwd, then start session detached (does not attach/switch) |
 | `hangar add [path] [--as <alias>]` | Register project (defaults to cwd); requires `.hangar.sh` to exist |
 | `hangar remove [query]` | Unregister; query matches alias/basename/path, fzf if ambiguous |
 | `hangar list` | Show registered projects + running status |
@@ -41,7 +42,7 @@ Aliases: `o=open, u=up, k=kill, l/ls=list, s/ss=sessions, sw=switch, a=add, rm=r
 | `hangar mark set/get/goto/list` | Manage marks (runtime tmux operations) |
 | `hangar template new/edit <name>` | Create or edit a user template |
 | `hangar templates` | List available template names |
-| `hangar bindings [--bind]` | Print or apply tmux keybindings for shortcuts + marks |
+| `hangar generate-bindings [--bind]` (alias `gb`) | Print or apply tmux keybindings for shortcuts + marks |
 
 ## Common Tasks
 
@@ -58,7 +59,7 @@ Aliases: `o=open, u=up, k=kill, l/ls=list, s/ss=sessions, sw=switch, a=add, rm=r
 5. (Optional) Create `~/.config/hangar/helpers.sh` for custom `init_*` helpers (see "Add or change a helper")
 6. Wire tmux to refresh bindings on reload — add to `~/.tmux.conf`:
    ```tmux
-   run-shell 'hangar bindings --bind'
+   run-shell 'hangar generate-bindings --bind'
    ```
 7. (Optional) Add tmux bindings for marks and the switcher popup (see "Tmux integration" below)
 
@@ -70,6 +71,7 @@ If migrating from the legacy `ts`/`tmux-mark` setup, **use the `migrate-from-ts`
 cd <project>
 hangar init [template]   # creates .hangar.sh; template defaults to config.yml's default_template
 hangar add               # registers cwd; or `hangar add <path> --as <alias>`
+# or: hangar bootstrap [template]   # init + add + start the session detached, in one shot
 ```
 
 Then edit `.hangar.sh` to set the shortcut and layout (next section).
@@ -81,7 +83,7 @@ Per-project file, sourced inside the session wrapper after `lib.sh` and `helpers
 Minimal example:
 
 ```bash
-shortcut "hg"   # 2-char tmux goto sequence; parsed by `hangar bindings`
+shortcut "hg"   # 2-char tmux goto sequence; parsed by `hangar generate-bindings`
 
 init_basic       # builtin: creates session, opens nvim in window 0, bash in window 9
 ```
@@ -123,7 +125,7 @@ Edit the project's `.hangar.sh` and change the `shortcut "xx"` line. Keys can be
 After editing, refresh bindings:
 
 ```bash
-hangar bindings --bind
+hangar generate-bindings --bind
 ```
 
 `hangar edit <query>` and `hangar open <query>` auto-refresh when run inside tmux, so manual refresh is only needed if neither was used.
@@ -182,7 +184,7 @@ Marks bind a multi-key sequence to a running session, persisted at `~/.local/sha
 - `hangar mark goto` — interactive picker (intended for a tmux popup)
 - `hangar mark list` — list all
 
-Editing the marks file directly is supported (format `<keys>=<session>`); afterward run `hangar bindings --bind` to apply.
+Editing the marks file directly is supported (format `<keys>=<session>`); afterward run `hangar generate-bindings --bind` to apply.
 
 ### Tmux integration
 
@@ -190,7 +192,7 @@ A typical `~/.tmux.conf` block for hangar:
 
 ```tmux
 # Apply hangar shortcuts + marks on tmux start/reload
-run-shell 'hangar bindings --bind'
+run-shell 'hangar generate-bindings --bind'
 
 # Set a mark on the current session
 bind m command-prompt -p "mark#(m=$(hangar mark get 2>/dev/null); [ -n \"$m\" ] && echo \" [$m]\"):" "run-shell 'hangar mark set %%'"
@@ -217,12 +219,12 @@ After any change, the right refresh action depends on what changed:
 
 | Change | Refresh |
 |---|---|
-| `.hangar.sh` shortcut | `hangar bindings --bind` (or use `hangar edit`/`open` inside tmux) |
+| `.hangar.sh` shortcut | `hangar generate-bindings --bind` (or use `hangar edit`/`open` inside tmux) |
 | `.hangar.sh` layout (windows/sends) | Kill + reopen the session: `hangar kill <q> && hangar open <q>` |
 | `helpers.sh` | Kill + reopen any session that uses the changed helper |
 | `config.yml` `default_template` | Takes effect on next `hangar init` |
 | `config.yml` `startup` | Takes effect on next `hangar up` |
-| Marks file edited directly | `hangar bindings --bind` |
+| Marks file edited directly | `hangar generate-bindings --bind` |
 | New/edited template | Takes effect on next `hangar init <name>` |
 
 ## Verification
@@ -231,7 +233,7 @@ After non-trivial changes:
 
 ```bash
 hangar list                  # registry intact, expected aliases shown
-hangar bindings              # prints expected tmux commands (no --bind = dry run)
+hangar generate-bindings     # prints expected tmux commands (no --bind = dry run)
 ruby -e "require 'yaml'; YAML.safe_load_file(File.expand_path('~/.config/hangar/config.yml'))"
 bash -n ~/.config/hangar/helpers.sh           # syntax-check helpers
 bash -n <project>/.hangar.sh                  # syntax-check a project script
