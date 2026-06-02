@@ -145,11 +145,17 @@ module Hangar
     end
 
     def self.cmd_init(args)
-      Template.init(args.first || Config.default_template)
+      template = args.first || Config.default_template
+      Hooks.run("before-init", HANGAR_TEMPLATE: template)
+      Template.init(template)
+      Hooks.run("after-init", HANGAR_TEMPLATE: template)
     end
 
     def self.cmd_bootstrap(args)
-      Template.init(args.first || Config.default_template)
+      template = args.first || Config.default_template
+      Hooks.run("before-init", HANGAR_TEMPLATE: template)
+      Template.init(template)
+      Hooks.run("after-init", HANGAR_TEMPLATE: template)
       Project.add(Dir.pwd)
       name = Project.session_name(Dir.pwd)
       case Session.start(Dir.pwd)

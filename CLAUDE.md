@@ -16,7 +16,7 @@ Tmux session & project manager. Ruby gem (`hangar-cli`), binary is `hangar`.
 
 - `bin/hangar` — CLI entry point (`require_relative "../lib/hangar"; Hangar::CLI.run(ARGV)`)
 - `lib/hangar.rb` — top-level requires
-- `lib/hangar/` — Ruby modules: `cli`, `config`, `project`, `session`, `marks`, `bindings`, `template`, `version`
+- `lib/hangar/` — Ruby modules: `cli`, `config`, `project`, `session`, `marks`, `bindings`, `template`, `hooks`, `version`
 - `share/hangar/lib.sh` — Bash session library bundled with the gem
 - `share/hangar/templates/` — Built-in templates (`basic.sh`, `dev.sh`)
 - `.claude-plugin/plugin.json` + `skills/hangar-configurer/` — Claude Code plugin shipped from this repo
@@ -34,6 +34,7 @@ Tmux session & project manager. Ruby gem (`hangar-cli`), binary is `hangar`.
   - User templates: `$XDG_DATA_HOME/hangar/templates/<name>.sh` (override builtins).
   - Optional helpers: `$XDG_CONFIG_HOME/hangar/helpers.sh` (sourced into every session wrapper).
   - Settings: `$XDG_CONFIG_HOME/hangar/config.yml` — supports `default_template` and `startup` (list of project queries for `hangar up`).
+  - Hooks: `$XDG_CONFIG_HOME/hangar/<hook>.sh` — `before-init`, `after-init`, `after-kill`, `after-up`. Each is run via `bash` (not sourced) with hook-specific env vars: `HANGAR_TEMPLATE` for init hooks, `HANGAR_SESSION` for `after-kill`, `HANGAR_STARTED` + `HANGAR_ALREADY_RUNNING` (space-separated) for `after-up`. A non-zero exit aborts the command and propagates the exit code, so `before-init` can veto. Missing hook files are silent no-ops.
 
 ## Commands
 

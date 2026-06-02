@@ -74,6 +74,10 @@ module Hangar
 
       puts "Started: #{started.join(', ')}" unless started.empty?
       puts "Already running: #{already_running.join(', ')}" unless already_running.empty?
+
+      Hooks.run("after-up",
+                HANGAR_STARTED: started.join(" "),
+                HANGAR_ALREADY_RUNNING: already_running.join(" "))
     end
 
     def self.kill(query)
@@ -94,6 +98,7 @@ module Hangar
 
       system("tmux", "kill-session", "-t", name)
       puts "Killed session: #{name}"
+      Hooks.run("after-kill", HANGAR_SESSION: name)
     end
 
     def self.list
