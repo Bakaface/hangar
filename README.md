@@ -150,6 +150,7 @@ Hangar follows the XDG base directory spec.
 | `$XDG_DATA_HOME/hangar/templates/` | User templates (override builtins of same name) |
 | `$XDG_CONFIG_HOME/hangar/config.yml` | `default_template`, `startup` list |
 | `$XDG_CONFIG_HOME/hangar/helpers.sh` | Cross-project bash helpers |
+| `$XDG_CONFIG_HOME/hangar/<hook>.sh` | Lifecycle hooks (`before-init`, `after-init`, `after-kill`, `after-up`) |
 | `<project>/.hangar.sh` | Per-project session script |
 
 Defaults: `$XDG_DATA_HOME` is `~/.local/share`, `$XDG_CONFIG_HOME` is `~/.config`.
@@ -324,6 +325,24 @@ Each `startup:` entry is passed to the same resolver as `hangar open`.
 
 Sourced into every session wrapper before `.hangar.sh`. Use it for shared `init_*` recipes so individual `.hangar.sh` files stay one-liners. Helpers can call anything in `lib.sh` and read `$session`, `$path`, `$repo`.
 
+### Hooks
+
+Drop an executable-free `<hook>.sh` in `~/.config/hangar/` and hangar runs it (via `bash`, not sourced) at the matching point in a command's lifecycle. Missing hook files are silent no-ops.
+
+| Hook | Fires | Env passed |
+|---|---|---|
+| `before-init` | Before `init`/`bootstrap` writes `.hangar.sh` | `HANGAR_TEMPLATE` |
+| `after-init` | After `.hangar.sh` is created | `HANGAR_TEMPLATE` |
+| `after-kill` | After a session is killed | `HANGAR_SESSION` |
+| `after-up` | After `up` finishes | `HANGAR_STARTED`, `HANGAR_ALREADY_RUNNING` (space-separated session lists) |
+
+A non-zero exit aborts the command and propagates the exit code, so `before-init` can **veto** an init. Example `~/.config/hangar/after-up.sh`:
+
+```bash
+#!/usr/bin/env bash
+[ -n "$HANGAR_STARTED" ] && notify-send "hangar: started $HANGAR_STARTED"
+```
+
 ### Refresh checklist
 
 After changing things, what to re-run:
@@ -403,7 +422,7 @@ ruby -e "require_relative 'lib/hangar'; puts 'OK'"
 bin/hangar                       # 4-line entry point
 lib/hangar.rb                    # top-level requires
 lib/hangar/cli.rb                # command dispatch + usage
-lib/hangar/{session,project,marks,bindings,template,config}.rb
+lib/hangar/{session,project,marks,bindings,template,config,hooks}.rb
 share/hangar/lib.sh              # bash helpers sourced into every session
 share/hangar/templates/*.sh      # builtin templates
 .claude-plugin/                  # Claude Code plugin manifest
